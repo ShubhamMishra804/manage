@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Add Transaction - Finance Advisor{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto mt-4 lg:mt-8">
+    <div class="animate-fade-in-up glass-card rounded-2xl p-8 shadow-xl">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-terra-50 dark:bg-terra-500/10 flex items-center justify-center">
+                <svg class="w-6 h-6 text-terra-600 dark:text-terra-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-2xl font-serif font-bold text-earth-800 dark:text-earth-100">Add Transaction</h2>
+                <p class="text-sm text-earth-500 dark:text-earth-400">Record your income or expense</p>
+            </div>
+        </div>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Transaction Type -->
+            <div>
+                <label class="block text-sm font-medium text-earth-700 dark:text-earth-300 mb-1.5">Type</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="transaction_type" value="income" class="peer sr-only" {% if form.transaction_type.value == 'income' %}checked{% endif %}>
+                        <div class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-earth-200 dark:border-earth-700 peer-checked:border-olive-500 peer-checked:bg-olive-50 dark:peer-checked:bg-olive-500/10 transition-all">
+                            <svg class="w-5 h-5 text-olive-600 dark:text-olive-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            <span class="text-sm font-semibold text-earth-700 dark:text-earth-300">Income</span>
+                        </div>
+                    </label>
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="transaction_type" value="expense" class="peer sr-only" {% if form.transaction_type.value == 'expense' or not form.transaction_type.value %}checked{% endif %}>
+                        <div class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-earth-200 dark:border-earth-700 peer-checked:border-terra-500 peer-checked:bg-terra-50 dark:peer-checked:bg-terra-500/10 transition-all">
+                            <svg class="w-5 h-5 text-terra-600 dark:text-terra-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                            <span class="text-sm font-semibold text-earth-700 dark:text-earth-300">Expense</span>
+                        </div>
+                    </label>
+                </div>
+                {% for error in form.transaction_type.errors %}
+                <p class="text-xs text-terra-500 mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label class="block text-sm font-medium text-earth-700 dark:text-earth-300 mb-1.5">Category</label>
+                {{ form.category }}
+                {% for error in form.category.errors %}
+                <p class="text-xs text-terra-500 mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Amount -->
+            <div>
+                <label class="block text-sm font-medium text-earth-700 dark:text-earth-300 mb-1.5">Amount (₹)</label>
+                {{ form.amount }}
+                {% for error in form.amount.errors %}
+                <p class="text-xs text-terra-500 mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-sm font-medium text-earth-700 dark:text-earth-300 mb-1.5">Description</label>
+                {{ form.description }}
+                {% for error in form.description.errors %}
+                <p class="text-xs text-terra-500 mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Date -->
+            <div>
+                <label class="block text-sm font-medium text-earth-700 dark:text-earth-300 mb-1.5">Date</label>
+                {{ form.date }}
+                {% for error in form.date.errors %}
+                <p class="text-xs text-terra-500 mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn-hover w-full bg-terra-500 hover:bg-terra-400 text-white font-semibold py-3 px-4 rounded-xl transition duration-200 mt-2 shadow-lg shadow-terra-500/15">
+                Save Transaction
+            </button>
+        </form>
+
+        <a href="{% url 'transaction_history' %}" class="block mt-4 text-center text-sm text-earth-500 dark:text-earth-400 hover:text-terra-500 transition">
+            ← View Transaction History
+        </a>
+    </div>
+</div>
+{% endblock %}

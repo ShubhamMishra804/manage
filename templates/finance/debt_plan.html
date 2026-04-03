@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% load currency_filters %}
+
+{% block title %}Debt Repayment Plan - Finance Advisor{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-4 space-y-6">
+    <!-- Header -->
+    <div class="animate-fade-in-up flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-serif font-bold text-earth-800 dark:text-earth-100">Debt Repayment Plan</h1>
+            <p class="text-sm text-earth-500 dark:text-earth-400">Hybrid Advisor Strategy — Snowball motivation + Avalanche efficiency</p>
+        </div>
+        <a href="{% url 'add_debt' %}" class="btn-hover inline-flex items-center gap-2 bg-terra-500 hover:bg-terra-400 text-white font-semibold py-2.5 px-5 rounded-xl transition duration-200 shadow-lg shadow-terra-500/15">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Add Debt
+        </a>
+    </div>
+
+    {% if debt_summary.debts %}
+    <!-- Overview Cards -->
+    <div class="animate-fade-in-up grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="glass-card rounded-xl p-5 text-center">
+            <p class="text-sm text-earth-500 dark:text-earth-400">Current Balance</p>
+            <p class="text-2xl font-bold text-terra-600 dark:text-terra-400"><span id="overview-total-debt">{{ debt_summary.total_remaining|indian_currency }}</span></p>
+        </div>
+        <div class="glass-card rounded-xl p-5 text-center">
+            <p class="text-sm text-earth-500 dark:text-earth-400">Amount Paid</p>
+            <p class="text-2xl font-bold text-olive-600 dark:text-olive-400"><span id="overview-total-paid">{{ debt_summary.total_paid|indian_currency }}</span></p>
+        </div>
+        <div class="glass-card rounded-xl p-5 text-center">
+            <p class="text-sm text-earth-500 dark:text-earth-400">Months to Freedom</p>
+            <p class="text-2xl font-bold text-earth-700 dark:text-earth-300" id="overview-months-to-freedom">
+                {% if months_to_freedom == -1 %}⚠️ N/A{% elif months_to_freedom == 0 %}🎉 Free!{% else %}{{ months_to_freedom }}{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Repayment Power -->
+    {% if power_data %}
+    <div class="animate-fade-in-up glass-card rounded-2xl p-6">
+        <h3 class="text-lg font-serif font-bold text-earth-800 dark:text-earth-100 mb-4">Repayment Power Breakdown</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div>
+                <p class="text-earth-500 dark:text-earth-400">Monthly Income</p>
+                <p class="font-bold text-earth-800 dark:text-earth-100">{{ power_data.monthly_income|indian_currency }}</p>
+            </div>
+            <div>
+                <p class="text-earth-500 dark:text-earth-400">Monthly Expenses</p>
+                <p class="font-bold text-earth-800 dark:text-earth-100">{{ power_data.monthly_expenses|indian_currency }}</p>
+            </div>
+            <div>
+                <p class="text-earth-500 dark:text-earth-400">Emergency Buffer (10%)</p>
+                <p class="font-bold text-terra-600 dark:text-terra-400">{{ power_data.emergency_buffer|indian_currency }}</p>
+            </div>
+            <div>
+                <p class="text-earth-500 dark:text-earth-400">Repayment Power</p>
+                <p class="font-bold text-olive-600 dark:text-olive-400">{{ power_data.repayment_power|indian_currency }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Individual Debts -->
+    <div class="animate-fade-in-up grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for debt in debts %}
+        <div class="glass-card rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <h4 class="font-semibold text-earth-800 dark:text-earth-100">{{ debt.name }}</h4>
+                    <a href="{% url 'edit_debt' debt.pk %}" class="text-earth-400 hover:text-terra-500 transition p-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </a>
+                </div>
+                <span class="text-xs font-medium text-terra-600 dark:text-terra-400 bg-terra-50 dark:bg-terra-500/10 px-2 py-0.5 rounded-full">{{ debt.interest_rate }}% APR</span>
+            </div>
+            <div class="mb-3">
+                <div class="flex justify-between text-xs text-earth-500 dark:text-earth-400 mb-1">
+                    <span><span id="debt-paid-text-{{ debt.id }}">{{ debt.amount_paid|indian_currency }}</span> paid</span>
+                    <span>{{ debt.total_amount|indian_currency }}</span>
+                </div>
+                <div class="w-full bg-earth-200 dark:bg-earth-700 rounded-full h-2.5">
+                    <div id="debt-progress-bar-{{ debt.id }}" class="bg-gradient-to-r from-terra-500 to-olive-500 h-2.5 rounded-full transition-all duration-500" style="width: {{ debt.progress_percent }}%"></div>
+                </div>
+            </div>
+            <div class="flex justify-between items-end text-sm">
+                <div class="flex flex-col">
+                    <span class="text-earth-500 dark:text-earth-400 text-xs">Remaining: <strong class="text-earth-800 dark:text-earth-100"><span id="debt-rem-{{ debt.id }}" data-raw="{{ debt.remaining|default:0 }}">{{ debt.remaining|indian_currency }}</span></strong></span>
+                    <span class="text-earth-500 dark:text-earth-400 text-xs">Min: <strong>{{ debt.minimum_payment|indian_currency }}</strong>/mo</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <div class="relative">
+                        <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-earth-400">₹</span>
+                        <input type="number" id="pay-input-{{ debt.id }}" placeholder="0" class="w-20 pl-4 pr-1.5 py-1 rounded-lg bg-earth-100 dark:bg-earth-800 border-none text-xs text-right font-bold text-earth-800 dark:text-earth-100 focus:ring-1 focus:ring-olive-500 transition">
+                    </div>
+                    <button onclick="logPayment({{ debt.id }})" id="pay-btn-{{ debt.id }}" class="p-1 px-2.5 rounded-lg bg-olive-600 hover:bg-olive-500 text-white text-[10px] font-bold transition flex items-center gap-1">
+                        <span>Pay</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- AI Advice -->
+    {% if ai_advice %}
+    <div class="animate-fade-in-up glass-card rounded-2xl p-6 border-l-4 border-terra-500">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-terra-500 to-terra-700 flex items-center justify-center flex-shrink-0 shadow-lg shadow-terra-500/15">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-terra-600 dark:text-terra-400 uppercase tracking-wider">AI Debt Coach</p>
+                <p class="text-sm text-earth-500 dark:text-earth-400">Personalized advice powered by AI</p>
+            </div>
+        </div>
+        <div id="ai-debt-coach-content" class="text-sm text-earth-700 dark:text-earth-300 italic">{{ ai_advice }}</div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const el = document.getElementById('ai-debt-coach-content');
+                if (el && typeof formatAiText === 'function') {
+                    el.innerHTML = formatAiText(el.innerText);
+                    el.classList.remove('italic');
+                }
+            });
+        </script>
+    </div>
+    {% endif %}
+
+    <!-- Repayment Schedule -->
+    {% if schedule %}
+    <div class="animate-fade-in-up glass-card rounded-2xl overflow-hidden">
+        <div class="px-6 pt-6 pb-3">
+            <h3 class="text-lg font-serif font-bold text-earth-800 dark:text-earth-100">Repayment Schedule</h3>
+            <p class="text-sm text-earth-500 dark:text-earth-400">Month-by-month plan using the Hybrid Strategy</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-earth-200 dark:border-earth-700">
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-earth-500 dark:text-earth-400 uppercase">Month</th>
+                        {% for debt in debt_summary.debts %}
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-earth-500 dark:text-earth-400 uppercase">{{ debt.name }}</th>
+                        {% endfor %}
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-earth-500 dark:text-earth-400 uppercase">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-earth-100 dark:divide-earth-800">
+                    {% for month in schedule %}
+                    <tr class="hover:bg-earth-100 dark:hover:bg-earth-800/50 transition-colors">
+                        <td class="px-6 py-3 text-sm font-medium text-earth-700 dark:text-earth-300">Month {{ month.month }}</td>
+                        {% for payment in month.payments %}
+                        <td class="px-6 py-3 text-sm text-right">
+                            <span class="text-earth-800 dark:text-earth-100 font-medium">{{ payment.payment|indian_currency }}</span>
+                            <br><span class="text-xs text-earth-400">({{ payment.remaining|indian_currency }} left)</span>
+                        </td>
+                        {% endfor %}
+                        <td class="px-6 py-3 text-sm text-right font-bold text-terra-600 dark:text-terra-400">{{ month.total_payment|indian_currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- No Debts State -->
+    <div class="animate-fade-in-up glass-card rounded-2xl p-12 text-center">
+        <svg class="w-16 h-16 text-olive-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <h3 class="text-xl font-serif font-bold text-earth-800 dark:text-earth-100 mb-2">You're debt-free! 🎉</h3>
+        <p class="text-earth-500 dark:text-earth-400 mb-6">No debts tracked. Add one if you'd like to create a repayment plan.</p>
+        <a href="{% url 'add_debt' %}" class="btn-hover inline-block bg-terra-500 hover:bg-terra-400 text-white font-semibold py-2.5 px-6 rounded-xl transition shadow-lg shadow-terra-500/15">
+            Add Your First Debt
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+async function logPayment(debtId) {
+    const input = document.getElementById(`pay-input-${debtId}`);
+    const amount = parseFloat(input.value);
+    const maxAmount = parseFloat(document.getElementById(`debt-rem-${debtId}`).getAttribute('data-raw') || 99999999);
+    const btn = document.getElementById(`pay-btn-${debtId}`);
+
+    if (isNaN(amount) || amount <= 0) {
+        input.classList.add('ring-2', 'ring-terra-500');
+        setTimeout(() => input.classList.remove('ring-2', 'ring-terra-500'), 1000);
+        return;
+    }
+    
+    if (amount > maxAmount + 0.01) { // small epsilon for float rounding
+        alert(`Maximum payment allowed is ${format_currency(maxAmount)}`);
+        input.value = maxAmount;
+        return;
+    }
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<div class="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>';
+    try {
+        const response = await fetch("{% url 'log_debt_payment' %}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ debt_id: debtId, payment_amount: amount })
+        });
+        const data = await response.json();
+        if (data.success) {
+            const remEl = document.getElementById(`debt-rem-${debtId}`);
+            remEl.textContent = data.remaining_individual;
+            remEl.setAttribute('data-raw', data.remaining_individual_raw);
+            document.getElementById(`debt-paid-text-${debtId}`).textContent = data.new_paid_individual;
+            document.getElementById(`debt-progress-bar-${debtId}`).style.width = data.progress_individual + '%';
+            document.getElementById('overview-total-paid').textContent = data.total_paid;
+            document.getElementById('overview-total-debt').textContent = data.total_remaining;
+            const monthsFreedom = document.getElementById('overview-months-to-freedom');
+            if (data.months_to_freedom === -1) monthsFreedom.textContent = '⚠️ N/A';
+            else if (data.months_to_freedom === 0) monthsFreedom.textContent = '🎉 Free!';
+            else monthsFreedom.textContent = data.months_to_freedom;
+            if (typeof fetchSidebarData === 'function') fetchSidebarData();
+            input.value = '';
+            input.placeholder = 'Paid! ✓';
+            setTimeout(() => { input.placeholder = '0'; }, 2000);
+            const card = btn.closest('.glass-card');
+            card.classList.add('ring-2', 'ring-olive-500/50');
+            setTimeout(() => card.classList.remove('ring-2', 'ring-olive-500/50'), 600);
+        } else {
+            alert("Error: " + data.message);
+        }
+    } catch (e) {
+        console.error("Payment logging failed", e);
+        alert("Server connection failed. Please try again.");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+</script>
+{% endblock %}

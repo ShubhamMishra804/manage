@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% load currency_filters %}
+
+{% block title %}Transaction History - Finance Advisor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-4 space-y-6">
+    <!-- Header -->
+    <div class="animate-fade-in-up flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-serif font-bold text-earth-800 dark:text-earth-100">Transaction History</h1>
+            <p class="text-sm text-earth-500 dark:text-earth-400">Your recent financial activity</p>
+        </div>
+        <a href="{% url 'add_transaction' %}" class="btn-hover inline-flex items-center gap-2 bg-terra-500 hover:bg-terra-400 text-white font-semibold py-2.5 px-5 rounded-xl transition duration-200 shadow-lg shadow-terra-500/15">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Add New
+        </a>
+    </div>
+<style>
+/* Smooth transition for bulk bar */
+#bulk-action-bar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s linear;
+}
+#bulk-action-bar.translate-y-full {
+    opacity: 0;
+}
+</style>
+
+    <!-- Summary Cards -->
+    <div class="animate-fade-in-up grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="glass-card rounded-xl p-4 text-center">
+            <p class="text-sm text-earth-500 dark:text-earth-400">Balance</p>
+            <p class="text-xl font-bold text-earth-800 dark:text-earth-100" id="summary-balance">{{ summary.balance|indian_currency }}</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 text-center">
+            <p class="text-sm text-earth-500 dark:text-earth-400">Total Income</p>
+            <p class="text-xl font-bold text-olive-600 dark:text-olive-400" id="summary-income">{{ summary.total_income|indian_currency }}</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 text-center">
+            <p class="text-sm text-earth-500 dark:text-earth-400">Total Expenses</p>
+            <p class="text-xl font-bold text-terra-600 dark:text-terra-400" id="summary-expenses">{{ summary.total_expenses|indian_currency }}</p>
+        </div>
+    </div>
+
+    <!-- Bulk Action Bar (Floating) -->
+    <div id="bulk-action-bar" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 translate-y-full flex items-center gap-6 px-6 py-3.5 bg-earth-800 dark:bg-earth-900 text-white rounded-2xl shadow-2xl border border-white/10 backdrop-blur-md">
+        <div class="flex items-center gap-2 border-r border-white/20 pr-6">
+            <span id="selected-count" class="font-bold text-terra-400">0</span>
+            <span class="text-sm text-earth-300">selected</span>
+        </div>
+        <button onclick="deleteTransactions(getSelectedIds(), true)" class="flex items-center gap-2 px-4 py-2 bg-terra-500 hover:bg-terra-400 rounded-xl font-semibold transition-all duration-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            Delete Selected
+        </button>
+        <button onclick="toggleAllCheckboxes(false)" class="text-sm text-earth-400 hover:text-white transition">Cancel</button>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="animate-fade-in-up glass-card rounded-2xl overflow-hidden">
+        {% if transactions %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-earth-200 dark:border-earth-700">
+                        <th class="px-6 py-4 w-10">
+                            <input type="checkbox" id="select-all" onclick="toggleAllCheckboxes(this.checked)" class="w-4 h-4 rounded border-earth-300 dark:border-earth-600 text-terra-600 focus:ring-terra-500 bg-transparent transition cursor-pointer">
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-earth-500 dark:text-earth-400 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-earth-500 dark:text-earth-400 uppercase tracking-wider">Description</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-earth-500 dark:text-earth-400 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold text-earth-500 dark:text-earth-400 uppercase tracking-wider">Amount</th>
+                        <th class="px-6 py-4 w-10 text-right"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-earth-100 dark:divide-earth-800">
+                    {% for txn in transactions %}
+                    <tr id="txn-row-{{ txn.id }}" class="hover:bg-earth-100 dark:hover:bg-earth-800/50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <input type="checkbox" value="{{ txn.id }}" class="txn-checkbox w-4 h-4 rounded border-earth-300 dark:border-earth-600 text-terra-600 focus:ring-terra-500 bg-transparent transition cursor-pointer">
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-earth-600 dark:text-earth-300">{{ txn.date|date:"d M Y" }}</td>
+                        <td class="px-6 py-4 text-sm text-earth-800 dark:text-earth-200 font-medium">{{ txn.description|default:"—" }}</td>
+...
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if txn.category %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if txn.transaction_type == 'income' %}bg-olive-50 dark:bg-olive-500/10 text-olive-700 dark:text-olive-400
+                                {% else %}bg-terra-50 dark:bg-terra-500/10 text-terra-700 dark:text-terra-400{% endif %}">
+                                {{ txn.category.name }}
+                            </span>
+                            {% else %}
+                            <span class="text-sm text-earth-400">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right
+                            {% if txn.transaction_type == 'income' %}text-olive-600 dark:text-olive-400{% else %}text-terra-600 dark:text-terra-400{% endif %}">
+                            {% if txn.transaction_type == 'income' %}+{% else %}-{% endif %}{{ txn.amount|indian_currency }}
+                        </td>
+                        <td class="px-6 py-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="deleteTransactions([{{ txn.id }}], false)" class="p-1.5 text-earth-400 hover:text-terra-500 transition-colors" title="Delete">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-12 text-center">
+            <svg class="w-12 h-12 text-earth-300 dark:text-earth-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <p class="text-earth-500 dark:text-earth-400 font-medium">No transactions yet</p>
+            <p class="text-sm text-earth-400 dark:text-earth-500 mt-1">Start by adding your first transaction</p>
+            <a href="{% url 'add_transaction' %}" class="btn-hover inline-block mt-4 bg-terra-500 hover:bg-terra-400 text-white font-semibold py-2 px-5 rounded-xl transition shadow-lg shadow-terra-500/15">
+                Add Transaction
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const checkboxes = document.querySelectorAll('.txn-checkbox');
+    const selectAll = document.getElementById('select-all');
+    const bulkBar = document.getElementById('bulk-action-bar');
+    const selectedCount = document.getElementById('selected-count');
+
+    window.toggleAllCheckboxes = (checked) => {
+        checkboxes.forEach(cb => cb.checked = checked);
+        updateBulkBar();
+    };
+
+    const updateBulkBar = () => {
+        const checked = Array.from(checkboxes).filter(cb => cb.checked);
+        selectedCount.textContent = checked.length;
+        if (checked.length > 0) {
+            bulkBar.classList.remove('translate-y-full');
+        } else {
+            bulkBar.classList.add('translate-y-full');
+            if (selectAll) selectAll.checked = false;
+        }
+    };
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkBar);
+    });
+
+    window.getSelectedIds = () => {
+        return Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+    };
+
+    window.deleteTransactions = async (ids, confirmMultiple) => {
+        if (confirmMultiple && ids.length > 1) {
+            if (!confirm(`Are you sure you want to delete ${ids.length} transactions?`)) return;
+        }
+
+        try {
+            const response = await fetch("{% url 'delete_transactions' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ ids })
+            });
+            const data = await response.json();
+            if (data.success) {
+                // Animate removal
+                ids.forEach(id => {
+                    const row = document.getElementById(`txn-row-${id}`);
+                    if (row) {
+                        row.classList.add('opacity-0', '-translate-x-4');
+                        setTimeout(() => row.remove(), 300);
+                    }
+                });
+                // Update summaries
+                document.getElementById('summary-balance').textContent = data.new_balance;
+                document.getElementById('summary-income').textContent = data.new_income;
+                document.getElementById('summary-expenses').textContent = data.new_expenses;
+                
+                // Refresh selection state after a delay
+                setTimeout(() => {
+                    const remaining = document.querySelectorAll('.txn-checkbox');
+                    if (remaining.length === 0) location.reload(); // Refresh to show empty state
+                    updateBulkBar();
+                }, 400);
+            }
+        } catch (e) {
+            console.error('Delete failed', e);
+        }
+    };
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Disable 2FA - Finance Advisor{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-6 lg:mt-10 animate-fade-in-up">
+    <div class="glass-card rounded-2xl p-8 shadow-xl">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-terra-50 dark:bg-terra-500/10 flex items-center justify-center">
+                <svg class="w-7 h-7 text-terra-600 dark:text-terra-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-serif font-bold text-earth-800 dark:text-earth-100">Disable 2FA</h2>
+        </div>
+        <p class="text-sm text-earth-500 dark:text-earth-400 mb-6">Are you sure you want to disable two-factor authentication? This will make your account less secure.</p>
+        <form method="post" class="flex gap-4">
+            {% csrf_token %}
+            <button type="submit" class="btn-hover bg-terra-600 hover:bg-terra-500 text-white font-semibold py-2.5 px-6 rounded-xl transition duration-200 shadow-lg shadow-terra-500/15">
+                Yes, Disable
+            </button>
+            <a href="{% url 'two_factor:profile' %}" class="btn-hover bg-earth-200 dark:bg-earth-700 hover:bg-earth-300 dark:hover:bg-earth-600 text-earth-800 dark:text-earth-100 font-semibold py-2.5 px-6 rounded-xl transition duration-200">
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

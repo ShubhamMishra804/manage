@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Backup Tokens - Finance Advisor{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-6 lg:mt-10 animate-fade-in-up">
+    <div class="glass-card rounded-2xl p-8 shadow-xl">
+        <h2 class="text-2xl font-serif font-bold text-earth-800 dark:text-earth-100 mb-4">Backup Tokens</h2>
+        <p class="text-sm text-earth-500 dark:text-earth-400 mb-6">Use these tokens to log in if you lose your authenticator device. Each token can only be used once.</p>
+
+        {% if backup_tokens %}
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            {% for token in backup_tokens %}
+            <div class="bg-earth-100 dark:bg-earth-900 border border-earth-200 dark:border-earth-700 rounded-lg py-2 px-4 text-center font-mono text-sm text-olive-600 dark:text-olive-400">
+                {{ token.token }}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-earth-500 dark:text-earth-400 mb-6">No backup tokens generated yet.</p>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-hover w-full bg-terra-500 hover:bg-terra-400 text-white font-semibold py-2.5 px-4 rounded-xl transition duration-200 shadow-lg shadow-terra-500/15">
+                Generate New Tokens
+            </button>
+        </form>
+        <a href="{% url 'two_factor:profile' %}" class="block mt-4 text-center text-sm text-earth-500 dark:text-earth-400 hover:text-earth-900 dark:hover:text-white transition">
+            ← Back to Account Security
+        </a>
+    </div>
+</div>
+{% endblock %}

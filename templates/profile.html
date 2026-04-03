@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Finance Advisor{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto mt-4 space-y-6">
+    <!-- User Header -->
+    <div class="animate-fade-in-up glass-card rounded-2xl p-8">
+        <div class="flex items-center gap-6">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-terra-500 to-terra-700 flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-terra-500/20">
+                {{ user.username|make_list|first|upper }}
+            </div>
+            <div>
+                <h2 class="text-2xl font-serif font-bold text-earth-800 dark:text-earth-100">{{ user.username }}</h2>
+                <p class="text-earth-500 dark:text-earth-400">{{ user.email }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="animate-fade-in-up glass-card rounded-2xl p-6">
+        <h3 class="text-lg font-serif font-bold text-earth-800 dark:text-earth-100 mb-4">Security Settings</h3>
+        <div class="bg-earth-100 dark:bg-earth-800/50 rounded-xl border border-earth-200 dark:border-earth-700 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+                <h4 class="font-medium text-earth-800 dark:text-earth-200">Two-Factor Authentication</h4>
+                <p class="text-sm text-earth-500 dark:text-earth-400 mt-1">Add an extra layer of security to your account.</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{% url 'two_factor:setup' %}" class="btn-hover bg-terra-500 hover:bg-terra-400 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-md shadow-terra-500/15">
+                    Enable 2FA
+                </a>
+                <a href="{% url 'two_factor:disable' %}" class="btn-hover bg-terra-50 dark:bg-terra-900/20 hover:bg-terra-100 dark:hover:bg-terra-900/40 text-terra-600 dark:text-terra-400 border border-terra-200 dark:border-terra-800/50 text-sm font-semibold py-2 px-4 rounded-lg transition duration-200">
+                    Disable
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

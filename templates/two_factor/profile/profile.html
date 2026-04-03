@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Account Security - Finance Advisor{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto mt-4 lg:mt-8 animate-fade-in-up">
+    <div class="glass-card rounded-2xl p-8 shadow-xl">
+        <h2 class="text-2xl font-serif font-bold text-earth-800 dark:text-earth-100 mb-6">Account Security</h2>
+
+        {% if default_device %}
+        <div class="flex items-center gap-3 mb-6 bg-olive-50 dark:bg-olive-900/20 border border-olive-200 dark:border-olive-800/30 rounded-xl p-4">
+            <svg class="w-5 h-5 text-olive-600 dark:text-olive-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <p class="text-olive-700 dark:text-olive-300 text-sm font-medium">Two-factor authentication is <strong>enabled</strong>. Primary method: Token generator.</p>
+        </div>
+        {% else %}
+        <div class="flex items-center gap-3 mb-6 bg-terra-50 dark:bg-terra-900/20 border border-terra-200 dark:border-terra-800/30 rounded-xl p-4">
+            <svg class="w-5 h-5 text-terra-600 dark:text-terra-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
+            <p class="text-terra-700 dark:text-terra-300 text-sm font-medium">Two-factor authentication is <strong>not enabled</strong>.</p>
+        </div>
+        {% endif %}
+
+        <!-- Backup Tokens -->
+        <div class="bg-earth-100 dark:bg-earth-800/50 rounded-xl border border-earth-200 dark:border-earth-700 p-5 mb-6">
+            <h3 class="text-lg font-semibold text-earth-800 dark:text-earth-100 mb-2">Backup Tokens</h3>
+            <p class="text-sm text-earth-500 dark:text-earth-400 mb-4">If you lose access to your authenticator, you can use backup tokens. You have <strong class="text-earth-800 dark:text-earth-100">{{ backup_tokens }} tokens</strong> remaining.</p>
+            <a href="{% url 'two_factor:backup_tokens' %}" class="btn-hover inline-block bg-earth-200 dark:bg-earth-700 hover:bg-earth-300 dark:hover:bg-earth-600 text-earth-800 dark:text-earth-100 text-sm font-semibold py-2 px-4 rounded-lg transition duration-200">
+                Show Codes
+            </a>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-4">
+            {% if default_device %}
+            <a href="{% url 'two_factor:disable' %}" class="btn-hover bg-terra-50 dark:bg-terra-900/20 hover:bg-terra-100 dark:hover:bg-terra-900/40 text-terra-600 dark:text-terra-400 border border-terra-200 dark:border-terra-800/50 text-sm font-semibold py-2 px-4 rounded-lg transition duration-200">
+                Disable Two-Factor Authentication
+            </a>
+            {% else %}
+            <a href="{% url 'two_factor:setup' %}" class="btn-hover bg-terra-500 hover:bg-terra-400 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-md shadow-terra-500/15">
+                Enable Two-Factor Authentication
+            </a>
+            {% endif %}
+            <a href="{% url 'profile' %}" class="btn-hover bg-earth-200 dark:bg-earth-700 hover:bg-earth-300 dark:hover:bg-earth-600 text-earth-800 dark:text-earth-100 text-sm font-semibold py-2 px-4 rounded-lg transition duration-200">
+                Back to Profile
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

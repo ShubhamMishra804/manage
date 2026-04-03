@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Edit {{ debt.name }}{% else %}Add Debt{% endif %} - Finance Advisor{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto mt-4 lg:mt-8">
+    <div class="animate-fade-in-up glass-card rounded-2xl p-8 shadow-xl">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-terra-50 dark:bg-terra-500/10 flex items-center justify-center">
+                <svg class="w-6 h-6 text-terra-600 dark:text-terra-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-2xl font-serif font-bold text-earth-800 dark:text-earth-100">{% if is_edit %}Edit {{ debt.name }}{% else %}Add Debt{% endif %}</h2>
+                <p class="text-sm text-earth-500 dark:text-earth-400">{% if is_edit %}Modify loan details{% else %}Track a loan or credit card balance{% endif %}</p>
+            </div>
+        </div>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="block text-sm font-medium text-earth-700 dark:text-earth-300 mb-1.5">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <p class="text-xs text-earth-400 dark:text-earth-500 mt-1">{{ field.help_text }}</p>
+                {% endif %}
+                {% for error in field.errors %}
+                <p class="text-xs text-terra-500 mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-hover w-full rounded-xl py-3 px-4 font-semibold text-white transition duration-200 mt-2 shadow-lg {% if is_edit %}bg-olive-600 hover:bg-olive-500 shadow-olive-500/15{% else %}bg-terra-500 hover:bg-terra-400 shadow-terra-500/15{% endif %}">
+                {% if is_edit %}Save Changes{% else %}Add Debt{% endif %}
+            </button>
+        </form>
+
+        <a href="{% url 'debt_plan' %}" class="block mt-4 text-center text-sm text-earth-500 dark:text-earth-400 hover:text-terra-500 transition">
+            ← View Debt Plan
+        </a>
+    </div>
+</div>
+{% endblock %}
